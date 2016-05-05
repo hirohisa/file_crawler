@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe FileCrawler::Finder do
+describe FileCrawler::Finder::Command::Search do
 
   it 'searches current directory' do
     path = '/tmp'
