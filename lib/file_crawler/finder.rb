@@ -1,4 +1,4 @@
-require 'file_crawler/finder/command'
+require_relative 'finder/command'
 
 module FileCrawler
 
