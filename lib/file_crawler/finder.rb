@@ -6,11 +6,13 @@ module FileCrawler
     attr_accessor :path
     attr_reader :rows
 
+    include Command::Move
     include Command::Search
 
-    def initialize(path)
+    def initialize(path = nil)
       @path = path
-      select_in_path(path)
+      @rows = []
+      select_in_path(path) unless path.nil?
     end
   end
 
@@ -35,6 +37,22 @@ module FileCrawler
     finder.rows
   end
 
+  # conditions
+  # - if dont have extension_in_directory, directory true
+  # - move check? if include, need condition[:force]
+  def self.move(path, destination, conditions = {})
+    raise ArgumentError unless File.directory?(destination)
 
+    search_conditions = {
+      directory: true,
+      extension_in_directory: conditions[:extension_in_directory]
+    }
+    search_conditions[:directory] = nil unless search_conditions[:extension_in_directory].nil?
+
+    directories = search(path, search_conditions)
+
+    finder = FileCrawler::Finder.new
+    finder.move(directories, destination)
+  end
 
 end
