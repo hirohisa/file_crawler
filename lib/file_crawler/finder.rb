@@ -7,6 +7,7 @@ module FileCrawler
     attr_reader :rows
 
     include Command::Move
+    include Command::Collect
     include Command::Search
 
     def initialize(path = nil)
@@ -53,6 +54,23 @@ module FileCrawler
 
     finder = FileCrawler::Finder.new
     finder.move(directories, destination)
+  end
+
+  # conditions
+  # - if dont have extension_in_directory, directory true
+  def self.collect(directories, conditions = {})
+    search_conditions = {
+      directory: true,
+      extension_in_directory: conditions[:extension_in_directory]
+    }
+    search_conditions[:directory] = nil unless search_conditions[:extension_in_directory].nil?
+
+    files = directories.map {|path|
+      search(path, search_conditions)
+    }.flatten
+
+    finder = FileCrawler::Finder.new
+    finder.collect(files)
   end
 
 end
