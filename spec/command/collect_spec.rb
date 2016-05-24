@@ -38,6 +38,37 @@ describe FileCrawler::Finder::Command::Collect do
     }
   end
 
+  it 'collects in file paths and uniques' do
+    path1 = '/path1'
+    files1 = [
+      '[abcd] defg', '[あい] うえお', 'test 123', '[123] 456',
+    ]
+    allow(Dir).to receive(:entries).with(path1).and_return(files1)
+
+    path2 = '/path2'
+    files2 = [
+      '[abcd] defg', '[あ] いうえお'
+    ]
+    allow(Dir).to receive(:entries).with(path2).and_return(files2)
+    allow(File).to receive(:directory?).and_return(true)
+
+    actual = FileCrawler.collect([path1, path2], unique: true)
+
+    expected = {
+      'abcd': ['/path1/[abcd] defg', '/path2/[abcd] defg'],
+      '123': ['/path1/test 123', '/path1/[123] 456'],
+      'あ': ['/path2/[あ] いうえお'],
+      'あい': ['/path1/[あい] うえお'],
+    }.map {|k,v|
+      [k.to_s, v]
+    }.to_h
+
+    expect(actual.keys.size).to eq expected.keys.size
+    actual.each {|actual_key, actual_value|
+      expect(actual_value.sort).to eq expected[actual_key].sort
+    }
+  end
+
   it 'splits with symbols' do
     finder = FileCrawler::Finder.new
 
