@@ -70,7 +70,7 @@ module FileCrawler
     }.flatten
 
     finder = FileCrawler::Finder.new
-    finder.collect(files)
+    finder.collect(files, conditions)
   end
 
 end
