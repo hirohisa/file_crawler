@@ -53,7 +53,15 @@ module FileCrawler
     directories = search(path, search_conditions)
 
     finder = FileCrawler::Finder.new
-    finder.move(directories, destination)
+
+    case
+    when conditions[:numbering] == true
+      finder.move_directories_with_numbering(directories, destination)
+    else
+      finder.move_directories_not_exist_destination(directories, destination)
+    end
+
+    finder.rows
   end
 
   # conditions
