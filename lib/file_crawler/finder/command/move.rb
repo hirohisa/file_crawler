@@ -15,7 +15,7 @@ module FileCrawler
 
           FileUtils.mv(move_targets, destination)
 
-          @rows = move_targets.map {|directory|
+          move_targets.map {|directory|
             destination + '/' + File.basename(directory)
           } + not_move_targets
         end
@@ -50,7 +50,7 @@ module FileCrawler
             renamed_targets << to
           }
 
-          @rows = move_targets.map {|directory|
+          move_targets.map {|directory|
             destination + '/' + File.basename(directory)
           } + not_move_targets + renamed_targets
         end
