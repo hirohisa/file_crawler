@@ -20,6 +20,15 @@ describe FileCrawler::Finder::Command::Organize do
 
     destination = '/var'
 
+    allow(File).to receive(:exist?).and_return(false)
+    allow(File).to receive(:exist?).with('/var').and_return(true)
+    allow(File).to receive(:exist?).with('/var/123').and_return(true)
+    allow(File).to receive(:exist?).with('/var/abcd').and_return(true)
+    allow(File).to receive(:exist?).with('/var/あ').and_return(true)
+    allow(File).to receive(:exist?).with('/var/あい').and_return(true)
+
+    allow(FileCrawler).to receive(:create_directory_if_needed).and_return(nil)
+
     allow(FileUtils).to receive(:mv).and_return(nil)
 
     result = FileCrawler.organize([path1, path2], destination, unique: true)

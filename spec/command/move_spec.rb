@@ -58,6 +58,8 @@ describe FileCrawler::Finder::Command::Move do
     allow(File).to receive(:directory?).and_return(false)
     allow(File).to receive(:directory?).with('/tmp/directory').and_return(true)
     allow(File).to receive(:directory?).with('/var').and_return(true)
+    allow(File).to receive(:exist?).and_return(false)
+    allow(File).to receive(:exist?).with('/var').and_return(true)
     allow(File).to receive(:exist?).with('/var/directory').and_return(true)
 
     allow(FileUtils).to receive(:mv).and_return(nil)
@@ -76,6 +78,7 @@ describe FileCrawler::Finder::Command::Move do
     allow(Dir).to receive(:entries).with(path).and_return(files)
     allow(File).to receive(:directory?).and_return(true)
     allow(File).to receive(:exist?).and_return(false)
+    allow(File).to receive(:exist?).with('/var').and_return(true)
     allow(File).to receive(:exist?).with('/var/directory').and_return(true)
 
     allow(FileUtils).to receive(:mv).and_return(nil)
