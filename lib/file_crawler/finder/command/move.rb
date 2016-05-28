@@ -13,6 +13,7 @@ module FileCrawler
             !valiable_to_move?(directory, destination)
           }
 
+          create_directory_if_needed(destination)
           FileUtils.mv(move_targets, destination)
 
           move_targets.map {|directory|
@@ -39,6 +40,7 @@ module FileCrawler
             move_targets << directory
           }
 
+          create_directory_if_needed(destination)
           FileUtils.mv(move_targets, destination)
 
           renamed_targets = []
@@ -53,6 +55,10 @@ module FileCrawler
           move_targets.map {|directory|
             destination + '/' + File.basename(directory)
           } + not_move_targets + renamed_targets
+        end
+
+        def create_directory_if_needed(directory)
+          Dir.mkdir(directory, 0777) unless File.exist?(directory)
         end
 
         def find_free_filename(current, destination)
