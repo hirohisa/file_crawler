@@ -6,8 +6,9 @@ module FileCrawler
     attr_accessor :path
     attr_reader :rows
 
-    include Command::Move
     include Command::Collect
+    include Command::Move
+    include Command::Organize
     include Command::Search
 
     def initialize(path = nil)
@@ -60,8 +61,6 @@ module FileCrawler
     else
       finder.move_directories_not_exist_destination(directories, destination)
     end
-
-    finder.rows
   end
 
   # conditions
@@ -79,6 +78,17 @@ module FileCrawler
 
     finder = FileCrawler::Finder.new
     finder.collect(files, conditions)
+  end
+
+  def self.organize(directories, destination, conditions = {})
+    finder = FileCrawler::Finder.new
+
+    result = collect(directories, conditions).map {|key, value|
+      directory = destination + '/' + key
+      finder.move_directories_with_numbering(value, directory)
+    }.flatten
+
+    result
   end
 
 end
