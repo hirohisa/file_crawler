@@ -7,7 +7,7 @@ describe FileCrawler::Finder::Command::Organize do
 
     path1 = '/path1'
     files1 = [
-      '[abcd] defg', '[あい] うえお', 'test 123', '[123] 456',
+      '[abcd] defg', '(あい) うえお', '[test] 123', '[123] 456',
     ]
     allow(Dir).to receive(:entries).with(path1).and_return(files1)
 
@@ -22,6 +22,7 @@ describe FileCrawler::Finder::Command::Organize do
 
     allow(File).to receive(:exist?).and_return(false)
     allow(File).to receive(:exist?).with('/var').and_return(true)
+    allow(File).to receive(:exist?).with('/var/test').and_return(true)
     allow(File).to receive(:exist?).with('/var/123').and_return(true)
     allow(File).to receive(:exist?).with('/var/abcd').and_return(true)
     allow(File).to receive(:exist?).with('/var/あ').and_return(true)
@@ -31,19 +32,19 @@ describe FileCrawler::Finder::Command::Organize do
 
     allow(FileUtils).to receive(:mv).and_return(nil)
 
-    result = FileCrawler.organize([path1, path2], destination, unique: true)
+    result = FileCrawler.organize([path1, path2], destination)
 
     expected = [
-      '/var/123/test 123',
       '/var/123/[123] 456',
       '/var/abcd/[abcd] defg',
       '/var/abcd/[abcd] defge',
+      '/var/test/[test] 123',
       '/var/あ/[あ] いうえお',
-      '/var/あい/[あい] うえお',
-    ]
+      '/var/あい/(あい) うえお',
+    ].sort
 
     expect(result.size).to eq expected.size
-    result.each_with_index {|item, index|
+    result.sort.each_with_index {|item, index|
       expect(item).to eq expected[index]
     }
   end
