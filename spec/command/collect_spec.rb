@@ -43,11 +43,17 @@ describe FileCrawler::Finder::Command::Collect do
     result = finder.decide_index_for_collect('【あいー】 うえお')
     expect(result).to eq 'あいー'
 
+    result = finder.decide_index_for_collect('test2test')
+    expect(result).to eq 'test2test'
+
     result = finder.decide_index_for_collect('t；e,s*t')
     expect(result).to eq 't'
 
     result = finder.decide_index_for_collect('   [test1] test2')
     expect(result).to eq 'test1'
+
+    result = finder.decide_index_for_collect('---')
+    expect(result).to eq '---'
 
     finder.regexs = [ FileCrawler::Regex.new('(', ')') ]
     result = finder.decide_index_for_collect('t(e_s)t')
@@ -56,9 +62,6 @@ describe FileCrawler::Finder::Command::Collect do
     finder.regexs = [ FileCrawler::Regex.new('[', ']') ]
     result = finder.decide_index_for_collect('(abc) [def] ghij [klmn]')
     expect(result).to eq 'def'
-
-    result = finder.decide_index_for_collect('test2test')
-    expect(result).to eq 'test2test'
   end
 
 end

@@ -40,7 +40,10 @@ module FileCrawler
           end
 
           pattern = /[\p{Hiragana}|\p{Katakana}|\p{Han}|[a-zA-Z0-9]ー 　]+/
-          return string.strip.scan(pattern).first
+          result = string.strip.scan(pattern).first
+          return result unless result.nil?
+
+          string
         end
 
         def collect_into_filename(file_paths)
