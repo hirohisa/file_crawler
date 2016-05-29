@@ -46,6 +46,9 @@ describe FileCrawler::Finder::Command::Collect do
     result = finder.decide_index_for_collect('t；e,s*t')
     expect(result).to eq 't'
 
+    result = finder.decide_index_for_collect('   [test1] test2')
+    expect(result).to eq 'test1'
+
     finder.regexs << FileCrawler::Regex.new('(', ')')
     result = finder.decide_index_for_collect('t(e_s)t')
     expect(result).to eq 'e_s'

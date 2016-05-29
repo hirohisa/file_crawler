@@ -7,7 +7,7 @@ describe FileCrawler::Finder::Command::Organize do
 
     path1 = '/path1'
     files1 = [
-      '[abcd] defg', '(あい) うえお', '[test] 123', '[123] 456',
+      '[abcd] defg', '(あい) うえお', '   [test] 123', '[123] 456',
     ]
     allow(Dir).to receive(:entries).with(path1).and_return(files1)
 
@@ -38,7 +38,7 @@ describe FileCrawler::Finder::Command::Organize do
       '/var/123/[123] 456',
       '/var/abcd/[abcd] defg',
       '/var/abcd/[abcd] defge',
-      '/var/test/[test] 123',
+      '/var/test/   [test] 123',
       '/var/あ/[あ] いうえお',
       '/var/あい/(あい) うえお',
     ].sort
