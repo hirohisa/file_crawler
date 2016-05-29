@@ -1,22 +1,46 @@
 module FileCrawler
+  class Regex
+    attr_accessor :regexp_start, :regexp_end
+
+    def initialize(regexp_start, regexp_end)
+      @regexp_start = regexp_start
+      @regexp_end = regexp_end
+    end
+
+    def pattern
+      /#{Regexp.escape(regexp_start)}(.+)#{Regexp.escape(regexp_end)}/
+    end
+
+    def to_s
+      "#<#{self.class.name}: start='#{regexp_start}', end='#{regexp_end}'"
+    end
+  end
+
   class Finder
     module Command
       module Collect
 
+        attr_accessor :regexs
+
+        def regexs
+          @regexs ||= []
+        end
+
         def collect(file_paths, conditions = {})
           collection = collect_into_filename(file_paths)
-
-          case
-          when !conditions[:unique].nil?
-            collection = unique_in_collection(collection)
-          end
 
           collection
         end
 
-        def split_for_collect(string)
-          pattern = /[\p{Hiragana}|\p{Katakana}|\p{Han}|[a-zA-Z0-9]ー]+/
-          return string.scan(pattern)
+        def decide_index_for_collect(string)
+          if !regexs.empty?
+            regexs.each {|regex|
+              return $1 unless regex.pattern.match(string).nil?
+            }
+          end
+
+          pattern = /[\p{Hiragana}|\p{Katakana}|\p{Han}|[a-zA-Z0-9]ー 　]+/
+          return string.strip.scan(pattern).first
         end
 
         def collect_into_filename(file_paths)
@@ -24,23 +48,9 @@ module FileCrawler
 
           file_paths.each {|file_path|
             filename = File.basename(file_path)
-            split_for_collect(filename).each {|term|
-              hash[term] ||= []
-              hash[term] << file_path
-            }
-          }
-
-          hash
-        end
-
-        def unique_in_collection(collection)
-          hash = {}
-
-          collection.sort {|(k1, v1), (k2, v2)|
-            v2.size <=> v1.size && k1 <=> k2
-          }.each {|term, file_paths|
-            selection = file_paths.select {|v| !hash.values.flatten.include?(v) }
-            hash[term] = selection unless selection.empty?
+            term = decide_index_for_collect(filename)
+            hash[term] ||= []
+            hash[term] << file_path
           }
 
           hash
