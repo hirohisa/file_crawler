@@ -8,7 +8,7 @@ module FileCrawler
     end
 
     def pattern
-      /#{Regexp.escape(regexp_start)}(.+)#{Regexp.escape(regexp_end)}/
+      /#{Regexp.escape(regexp_start)}([^#{Regexp.escape(regexp_end)}]+)#{Regexp.escape(regexp_end)}/
     end
 
     def to_s
