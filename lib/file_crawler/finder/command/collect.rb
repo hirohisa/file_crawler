@@ -10,11 +10,17 @@ module FileCrawler
     def pattern
       /#{Regexp.escape(regexp_start)}(.+)#{Regexp.escape(regexp_end)}/
     end
+
+    def to_s
+      "#<#{self.class.name}: start='#{regexp_start}', end='#{regexp_end}'"
+    end
   end
 
   class Finder
     module Command
       module Collect
+
+        attr_accessor :regexs
 
         def regexs
           @regexs ||= []

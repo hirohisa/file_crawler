@@ -77,6 +77,12 @@ module FileCrawler
     }.flatten
 
     finder = FileCrawler::Finder.new
+    unless conditions[:regexs].nil?
+      conditions[:regexs].each {|regex|
+        finder.regexs << regex
+      }
+    end
+
     finder.collect(files, conditions)
   end
 

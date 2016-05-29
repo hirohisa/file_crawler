@@ -13,7 +13,7 @@ describe FileCrawler::Finder::Command::Organize do
 
     path2 = '/path2'
     files2 = [
-      '[abcd] defge', '[あ] いうえお'
+      '[abcd] defge', 'かきくけこ [あ] いうえお'
     ]
     allow(Dir).to receive(:entries).with(path2).and_return(files2)
     allow(File).to receive(:directory?).and_return(true)
@@ -32,14 +32,23 @@ describe FileCrawler::Finder::Command::Organize do
 
     allow(FileUtils).to receive(:mv).and_return(nil)
 
-    result = FileCrawler.organize([path1, path2], destination)
+    regexs = [
+      FileCrawler::Regex.new('(', ')'),
+      FileCrawler::Regex.new('[', ']'),
+    ]
+
+    conditions = {
+      regexs: regexs
+    }
+
+    result = FileCrawler.organize([path1, path2], destination, conditions)
 
     expected = [
       '/var/123/[123] 456',
       '/var/abcd/[abcd] defg',
       '/var/abcd/[abcd] defge',
       '/var/test/   [test] 123',
-      '/var/あ/[あ] いうえお',
+      '/var/あ/かきくけこ [あ] いうえお',
       '/var/あい/(あい) うえお',
     ].sort
 
