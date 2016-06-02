@@ -3,7 +3,6 @@ require_relative 'finder/command'
 module FileCrawler
 
   class Finder
-    attr_accessor :path
     attr_reader :rows
 
     include Command::Collect
@@ -11,10 +10,8 @@ module FileCrawler
     include Command::Organize
     include Command::Search
 
-    def initialize(path = nil)
-      @path = path
+    def initialize
       @rows = []
-      select_in_path(path) unless path.nil?
     end
   end
 
@@ -23,17 +20,19 @@ module FileCrawler
   #   exntesion [Array]
   #   extension_in_directory [Array]
   def self.search(path, conditions = {})
-    finder = FileCrawler::Finder.new(path)
+    finder = FileCrawler::Finder.new
 
     case
     when !conditions[:extension].nil?
-      finder.select_with_extension(conditions[:extension])
+      finder.select_in_path(path).select_with_extension(conditions[:extension])
     when conditions[:directory] == true
-      finder.select_directories
+      finder.select_in_path(path).select_directories
     when conditions[:directory] == false
-      finder.select_files
+      finder.select_in_path(path).select_files
     when !conditions[:extension_in_directory].nil?
-      finder.select_with_extension_in_directory(conditions[:extension_in_directory])
+      finder.select_in_path(path).select_with_extension_in_directory(conditions[:extension_in_directory])
+    else
+      finder.select_in_path(path)
     end
 
     finder.rows
