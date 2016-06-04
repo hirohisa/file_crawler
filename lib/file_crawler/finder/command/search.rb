@@ -3,17 +3,22 @@ module FileCrawler
     module Command
       module Search
 
-        def select_in_path(path)
-          tap {
-            @rows = find_rows_in_path(path)
-          }
+        def search(path, conditions)
+          case
+          when !conditions[:extension].nil?
+            select_in_path(path).select_with_extension(conditions[:extension])
+          when !conditions[:extension_in_directory].nil?
+            select_in_path(path).select_with_extension_in_directory(conditions[:extension_in_directory])
+          when conditions[:directory] == true
+            select_in_path(path).select_directories
+          else
+            select_in_path(path)
+          end
         end
 
-        def find_rows_in_path(path)
-          Dir.entries(path).select {|item|
-            !item.start_with?('.')
-          }.map {|item|
-            path + '/' + item
+        def select_in_path(path)
+          tap {
+            @rows += find_rows_in_path(path)
           }
         end
 
@@ -23,8 +28,31 @@ module FileCrawler
           }
         end
 
+        def select_directories
+          tap {
+            @rows = find_rows_directories(rows)
+          }
+        end
+
+        def select_with_extension_in_directory(extension)
+          tap {
+            @rows = find_rows_with_extension_in_directories(extension, find_rows_directories(rows))
+          }
+        end
+
+      private
+
+        def find_rows_in_path(path)
+          Dir.entries(path).select {|item|
+            !item.start_with?('.')
+          }.map {|item|
+            path + '/' + item
+          }
+        end
+
         def find_rows_with_extension(extension, resource)
-          find_rows_files(resource).select {|item|
+          resource.select {|item|
+            !File.directory?(item) &&
             extension.any? {|e|
               extname = File.extname(item).downcase
               extname == ".#{e.downcase}"
@@ -32,33 +60,9 @@ module FileCrawler
           }
         end
 
-        def select_files
-          tap {
-            @rows = find_rows_files(rows)
-          }
-        end
-
-        def find_rows_files(resource)
-          resource.select {|item|
-            !File.directory?(item)
-          }
-        end
-
-        def select_directories
-          tap {
-            @rows = find_rows_directories(rows)
-          }
-        end
-
         def find_rows_directories(resource)
           resource.select {|item|
             File.directory?(item)
-          }
-        end
-
-        def select_with_extension_in_directory(extension)
-          tap {
-            @rows = find_rows_with_extension_in_directories(extension, find_rows_directories(rows))
           }
         end
 

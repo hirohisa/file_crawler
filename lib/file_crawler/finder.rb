@@ -21,19 +21,7 @@ module FileCrawler
   #   extension_in_directory [Array]
   def self.search(path, conditions = {})
     finder = FileCrawler::Finder.new
-
-    case
-    when !conditions[:extension].nil?
-      finder.select_in_path(path).select_with_extension(conditions[:extension])
-    when conditions[:directory] == true
-      finder.select_in_path(path).select_directories
-    when conditions[:directory] == false
-      finder.select_in_path(path).select_files
-    when !conditions[:extension_in_directory].nil?
-      finder.select_in_path(path).select_with_extension_in_directory(conditions[:extension_in_directory])
-    else
-      finder.select_in_path(path)
-    end
+    finder.search(path, conditions)
 
     finder.rows
   end
@@ -48,7 +36,6 @@ module FileCrawler
       directory: true,
       extension_in_directory: conditions[:extension_in_directory]
     }
-    search_conditions[:directory] = nil unless search_conditions[:extension_in_directory].nil?
 
     directories = search(path, search_conditions)
 
@@ -69,7 +56,6 @@ module FileCrawler
       directory: true,
       extension_in_directory: conditions[:extension_in_directory]
     }
-    search_conditions[:directory] = nil unless search_conditions[:extension_in_directory].nil?
 
     files = directories.map {|path|
       search(path, search_conditions)
