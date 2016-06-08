@@ -5,20 +5,10 @@ module FileCrawler
     module Command
       module Move
 
-        def move_directories_not_exist_destination(directories, destination)
-          move_targets = directories.select {|directory|
-            valiable_to_move?(directory, destination)
+        def move(destination)
+          tap {
+            @rows = move_directories_with_numbering(@rows, destination)
           }
-          not_move_targets = directories.select {|directory|
-            !valiable_to_move?(directory, destination)
-          }
-
-          create_directory_if_needed(destination)
-          FileUtils.mv(move_targets, destination)
-
-          move_targets.map {|directory|
-            destination + '/' + File.basename(directory)
-          } + not_move_targets
         end
 
         def move_directories_with_numbering(directories, destination)

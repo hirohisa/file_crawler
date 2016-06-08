@@ -32,21 +32,10 @@ module FileCrawler
   def self.move(path, destination, conditions = {})
     raise ArgumentError unless File.directory?(destination)
 
-    search_conditions = {
-      directory: true,
-      extension_in_directory: conditions[:extension_in_directory]
-    }
-
-    directories = search(path, search_conditions)
-
     finder = FileCrawler::Finder.new
+    finder.search(path).move(destination)
 
-    case
-    when conditions[:numbering] == true
-      finder.move_directories_with_numbering(directories, destination)
-    else
-      finder.move_directories_not_exist_destination(directories, destination)
-    end
+    finder.rows
   end
 
   # conditions

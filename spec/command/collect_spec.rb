@@ -3,6 +3,8 @@ require 'spec_helper'
 describe FileCrawler::Finder::Command::Collect do
 
   it 'collects in file paths' do
+    allow(Dir).to receive(:entries).and_return([])
+
     path1 = '/path1'
     files1 = [
       '[abcd] defg', '[あい] うえお', 'test 123', '[123] 456',
