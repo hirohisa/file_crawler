@@ -56,8 +56,8 @@ module FileCrawler
 
           index = 1
           new_filename = "#{filename} (#{index})"
-          while File.exist?(new_filename)
-            i += 1
+          while exist_file?(new_filename, destination)
+            index += 1
             new_filename = "#{filename} (#{index})"
           end
 

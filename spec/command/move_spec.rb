@@ -34,13 +34,14 @@ describe FileCrawler::Finder::Command::Move do
     allow(File).to receive(:exist?).and_return(false)
     allow(File).to receive(:exist?).with('/var').and_return(true)
     allow(File).to receive(:exist?).with('/var/directory').and_return(true)
+    allow(File).to receive(:exist?).with('/var/directory (1)').and_return(true)
 
     allow(FileUtils).to receive(:mv).and_return(nil)
 
     result = FileCrawler.move(path, destination, numbering: true)
 
     expect(result[0]).to eq destination + '/' + files[1] # /var/directory1
-    expect(result[1]).to eq destination + '/' + "#{files[0]} (1)"  # /var/directory (1)
+    expect(result[1]).to eq destination + '/' + "#{files[0]} (2)"  # /var/directory (2)
   end
 
 end
