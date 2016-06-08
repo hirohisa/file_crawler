@@ -26,10 +26,23 @@ module FileCrawler
           @regexs ||= []
         end
 
-        def collect(file_paths, conditions = {})
-          collection = collect_into_filename(file_paths)
+        def collect(conditions = {})
+          tap {
+            @rows = collect_into_filename(@rows)
+          }
+        end
 
-          collection
+        def collect_into_filename(file_paths)
+          hash = {}
+
+          file_paths.each {|file_path|
+            filename = File.basename(file_path)
+            term = decide_index_for_collect(filename)
+            hash[term] ||= []
+            hash[term] << file_path
+          }
+
+          hash
         end
 
         def decide_index_for_collect(string)
@@ -44,19 +57,6 @@ module FileCrawler
           return result unless result.nil?
 
           string
-        end
-
-        def collect_into_filename(file_paths)
-          hash = {}
-
-          file_paths.each {|file_path|
-            filename = File.basename(file_path)
-            term = decide_index_for_collect(filename)
-            hash[term] ||= []
-            hash[term] << file_path
-          }
-
-          hash
         end
 
       end

@@ -40,16 +40,7 @@ module FileCrawler
 
   # conditions
   # - if dont have extension_in_directory, directory true
-  def self.collect(directories, conditions = {})
-    search_conditions = {
-      directory: true,
-      extension_in_directory: conditions[:extension_in_directory]
-    }
-
-    files = directories.map {|path|
-      search(path, search_conditions)
-    }.flatten
-
+  def self.collect(path, conditions = {})
     finder = FileCrawler::Finder.new
     unless conditions[:regexs].nil?
       conditions[:regexs].each {|regex|
@@ -57,7 +48,9 @@ module FileCrawler
       }
     end
 
-    finder.collect(files, conditions)
+    finder.search(path).collect(conditions)
+
+    finder.rows
   end
 
   def self.organize(directories, destination, conditions = {})

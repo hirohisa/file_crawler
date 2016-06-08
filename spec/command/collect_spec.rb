@@ -5,27 +5,33 @@ describe FileCrawler::Finder::Command::Collect do
   it 'collects in file paths' do
     allow(Dir).to receive(:entries).and_return([])
 
-    path1 = '/path1'
+    path = '/path'
+    files = [
+      'path1', 'path2'
+    ]
+    allow(Dir).to receive(:entries).with(path).and_return(files)
+
+    path1 = '/path/path1'
     files1 = [
       '[abcd] defg', '[あい] うえお', 'test 123', '[123] 456',
     ]
     allow(Dir).to receive(:entries).with(path1).and_return(files1)
 
-    path2 = '/path2'
+    path2 = '/path/path2'
     files2 = [
       '[abcd] defg', '[あ] いうえお'
     ]
     allow(Dir).to receive(:entries).with(path2).and_return(files2)
     allow(File).to receive(:directory?).and_return(true)
 
-    actual = FileCrawler.collect([path1, path2])
+    actual = FileCrawler.collect(path)
 
     expected = {
-      'abcd': ['/path1/[abcd] defg', '/path2/[abcd] defg'],
-      'test 123': ['/path1/test 123'],
-      '123': ['/path1/[123] 456'],
-      'あ': ['/path2/[あ] いうえお'],
-      'あい': ['/path1/[あい] うえお'],
+      'abcd': ['/path/path1/[abcd] defg', '/path/path2/[abcd] defg'],
+      'test 123': ['/path/path1/test 123'],
+      '123': ['/path/path1/[123] 456'],
+      'あ': ['/path/path2/[あ] いうえお'],
+      'あい': ['/path/path1/[あい] うえお'],
     }.map {|k,v|
       [k.to_s, v]
     }.to_h
