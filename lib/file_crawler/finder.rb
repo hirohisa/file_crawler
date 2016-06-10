@@ -7,7 +7,6 @@ module FileCrawler
 
     include Command::Collect
     include Command::Move
-    include Command::Organize
     include Command::Search
 
     def initialize
@@ -53,15 +52,18 @@ module FileCrawler
     finder.rows
   end
 
-  def self.organize(directories, destination, conditions = {})
+  def self.organize(path, destination, conditions = {})
     finder = FileCrawler::Finder.new
 
-    result = collect(directories, conditions).map {|key, value|
-      directory = destination + '/' + key
-      finder.move_directories_with_numbering(value, directory)
-    }.flatten
+    unless conditions[:regexs].nil?
+      conditions[:regexs].each {|regex|
+        finder.regexs << regex
+      }
+    end
 
-    result
+    finder.search(path).collect(conditions).move_from_collection(destination)
+
+    finder.rows
   end
 
 end

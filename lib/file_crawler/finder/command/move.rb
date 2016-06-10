@@ -7,16 +7,22 @@ module FileCrawler
 
         def move(destination)
           tap {
-            @rows = move_directories_with_numbering(@rows, destination)
+            @rows = move_with_numbering(@rows, destination)
           }
         end
 
-        def move_directories_with_numbering(directories, destination)
+        def move_from_collection(destination)
+          tap {
+            @rows = move_from_collection_with_numbering(@rows, destination)
+          }
+        end
+
+        def move_with_numbering(source, destination)
           move_targets = []
           not_move_targets = []
           rename_targets = []
 
-          directories.each {|directory|
+          source.each {|directory|
             if is_same?(directory, destination)
               not_move_targets << directory
               next
@@ -45,6 +51,15 @@ module FileCrawler
           move_targets.map {|directory|
             destination + '/' + File.basename(directory)
           } + not_move_targets + renamed_targets
+        end
+
+        def move_from_collection_with_numbering(source, destination)
+          result = source.map {|key, value|
+            directory = destination + '/' + key
+            move_with_numbering(value, directory)
+          }.flatten
+
+          result
         end
 
         def create_directory_if_needed(directory)
