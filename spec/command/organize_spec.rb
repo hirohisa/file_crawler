@@ -1,17 +1,23 @@
 require 'spec_helper'
 
-describe FileCrawler::Finder::Command::Organize do
+describe "FileCrawler::Finder::Command::Organize" do
 
   it 'organizes' do
     allow(Dir).to receive(:entries).and_return([])
 
-    path1 = '/path1'
+    path = '/path'
+    files = [
+      'path1', 'path2'
+    ]
+    allow(Dir).to receive(:entries).with(path).and_return(files)
+
+    path1 = '/path/path1'
     files1 = [
       '[abcd] defg', '(あい) うえお', '   [test] 123', '[123] 456',
     ]
     allow(Dir).to receive(:entries).with(path1).and_return(files1)
 
-    path2 = '/path2'
+    path2 = '/path/path2'
     files2 = [
       '[abcd] defge', 'かきくけこ [あ] いうえお'
     ]
@@ -41,7 +47,7 @@ describe FileCrawler::Finder::Command::Organize do
       regexs: regexs
     }
 
-    result = FileCrawler.organize([path1, path2], destination, conditions)
+    result = FileCrawler.organize(path, destination, conditions)
 
     expected = [
       '/var/123/[123] 456',

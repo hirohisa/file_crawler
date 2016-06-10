@@ -26,21 +26,10 @@ module FileCrawler
           @regexs ||= []
         end
 
-        def collect(file_paths, conditions = {})
-          collection = collect_into_filename(file_paths)
-
-          collection
-        end
-
-        def decide_index_for_collect(string)
-          if !regexs.empty?
-            regexs.each {|regex|
-              return $1 unless regex.pattern.match(string).nil?
-            }
-          end
-
-          pattern = /[\p{Hiragana}|\p{Katakana}|\p{Han}|[a-zA-Z0-9]ー 　]+/
-          return string.strip.scan(pattern).first
+        def collect(conditions = {})
+          tap {
+            @rows = collect_into_filename(@rows)
+          }
         end
 
         def collect_into_filename(file_paths)
@@ -54,6 +43,20 @@ module FileCrawler
           }
 
           hash
+        end
+
+        def decide_index_for_collect(string)
+          if !regexs.empty?
+            regexs.each {|regex|
+              return $1 unless regex.pattern.match(string).nil?
+            }
+          end
+
+          pattern = /[\p{Hiragana}|\p{Katakana}|\p{Han}|[a-zA-Z0-9]ー 　]+/
+          result = string.strip.scan(pattern).first
+          return result unless result.nil?
+
+          string
         end
 
       end

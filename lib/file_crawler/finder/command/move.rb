@@ -5,28 +5,24 @@ module FileCrawler
     module Command
       module Move
 
-        def move_directories_not_exist_destination(directories, destination)
-          move_targets = directories.select {|directory|
-            valiable_to_move?(directory, destination)
+        def move(destination)
+          tap {
+            @rows = move_with_numbering(@rows, destination)
           }
-          not_move_targets = directories.select {|directory|
-            !valiable_to_move?(directory, destination)
-          }
-
-          create_directory_if_needed(destination)
-          FileUtils.mv(move_targets, destination)
-
-          move_targets.map {|directory|
-            destination + '/' + File.basename(directory)
-          } + not_move_targets
         end
 
-        def move_directories_with_numbering(directories, destination)
+        def move_from_collection(destination)
+          tap {
+            @rows = move_from_collection_with_numbering(@rows, destination)
+          }
+        end
+
+        def move_with_numbering(source, destination)
           move_targets = []
           not_move_targets = []
           rename_targets = []
 
-          directories.each {|directory|
+          source.each {|directory|
             if is_same?(directory, destination)
               not_move_targets << directory
               next
@@ -57,6 +53,15 @@ module FileCrawler
           } + not_move_targets + renamed_targets
         end
 
+        def move_from_collection_with_numbering(source, destination)
+          result = source.map {|key, value|
+            directory = destination + '/' + key
+            move_with_numbering(value, directory)
+          }.flatten
+
+          result
+        end
+
         def create_directory_if_needed(directory)
           Dir.mkdir(directory, 0777) unless File.exist?(directory)
         end
@@ -66,8 +71,8 @@ module FileCrawler
 
           index = 1
           new_filename = "#{filename} (#{index})"
-          while File.exist?(new_filename)
-            i += 1
+          while exist_file?(new_filename, destination)
+            index += 1
             new_filename = "#{filename} (#{index})"
           end
 
