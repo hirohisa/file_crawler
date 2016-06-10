@@ -48,15 +48,15 @@ module FileCrawler
         def decide_index_for_collect(string)
           if !regexs.empty?
             regexs.each {|regex|
-              return $1 unless regex.pattern.match(string).nil?
+              return $1.strip unless regex.pattern.match(string).nil?
             }
           end
 
           pattern = /[\p{Hiragana}|\p{Katakana}|\p{Han}|[a-zA-Z0-9]ー 　]+/
           result = string.strip.scan(pattern).first
-          return result unless result.nil?
+          return result.strip unless result.nil?
 
-          string
+          string.strip
         end
 
       end
