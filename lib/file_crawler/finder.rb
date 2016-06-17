@@ -7,6 +7,7 @@ module FileCrawler
 
     include Command::Collect
     include Command::Move
+    include Command::Resemble
     include Command::Search
 
     def initialize
@@ -62,6 +63,14 @@ module FileCrawler
     end
 
     finder.search(path).collect(conditions).move_from_collection(destination)
+
+    finder.rows
+  end
+
+  def self.resemble(path, conditions = {})
+    finder = FileCrawler::Finder.new
+
+    finder.search(path).collect(conditions).resemble()
 
     finder.rows
   end
