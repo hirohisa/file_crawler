@@ -33,6 +33,11 @@ module FileCrawler
               next
             end
 
+            if move_targets.include?(directory)
+              rename_targets << directory
+              next
+            end
+
             move_targets << directory
           }
 
