@@ -1,105 +1,107 @@
 require 'fileutils'
 
-module FileCrawler
-  class Finder
-    module Command
-      module Move
+module FileCrawler::Finder::Command
 
-        def move(destination)
-          tap {
-            @rows = move_with_numbering(@rows, destination)
+  module Move
+
+    def move(destination, options={dry_run: true})
+      tap {
+        target = @collections.empty? ? @files : @collections
+        fixer = Fixer.new
+        @targets = fixer.make_new_path(target, destination)
+
+        if !options[:dry_run]
+          fixer.make_mv(@targets).each {|cmd|
+            exec(cmd)
           }
         end
-
-        def move_from_collection(destination)
-          tap {
-            @rows = move_from_collection_with_numbering(@rows, destination)
-          }
-        end
-
-        def move_with_numbering(source, destination)
-          move_targets = []
-          not_move_targets = []
-          rename_targets = []
-
-          source.each {|directory|
-            if is_same?(directory, destination)
-              not_move_targets << directory
-              next
-            end
-
-            if exist_file?(directory, destination)
-              rename_targets << directory
-              next
-            end
-
-            if move_targets.include?(directory)
-              rename_targets << directory
-              next
-            end
-
-            move_targets << directory
-          }
-
-          create_directory_if_needed(destination)
-          FileUtils.mv(move_targets, destination)
-
-          renamed_targets = []
-          rename_targets.each {|directory|
-            filename = find_free_filename(directory, destination)
-            to = destination + '/' + filename
-            FileUtils.mv(directory, to)
-
-            renamed_targets << to
-          }
-
-          move_targets.map {|directory|
-            destination + '/' + File.basename(directory)
-          } + not_move_targets + renamed_targets
-        end
-
-        def move_from_collection_with_numbering(source, destination)
-          result = source.map {|key, value|
-            directory = destination + '/' + key
-            move_with_numbering(value, directory)
-          }.flatten
-
-          result
-        end
-
-        def create_directory_if_needed(directory)
-          Dir.mkdir(directory, 0777) unless File.exist?(directory)
-        end
-
-        def find_free_filename(current, destination)
-          filename = File.basename(current)
-
-          index = 1
-          new_filename = "#{filename} (#{index})"
-          while exist_file?(new_filename, destination)
-            index += 1
-            new_filename = "#{filename} (#{index})"
-          end
-
-          new_filename
-        end
-
-        def valiable_to_move?(current, destination)
-          return false if is_same?(current, destination)
-
-          !exist_file?(current, destination)
-        end
-
-        def is_same?(current, destination)
-          current == destination
-        end
-
-        def exist_file?(current, destination)
-          next_path = destination + '/' + File.basename(current)
-          File.exist?(next_path)
-        end
-
-      end
+      }
     end
+
+    def cmds
+      return nil if @targets.nil?
+
+      fixer = Fixer.new
+      fixer.make_mv(@targets)
+    end
+
+    class Fixer
+
+      def make_new_path(sources, destination)
+        case sources
+        when Hash
+          return make_new_path_for_collection(sources, destination)
+        when Array
+          return make_new_path_for_array(sources, destination)
+        when String
+          return make_new_path_for_array([sources], destination)
+        end
+
+        ArgumentError
+      end
+
+      def make_mv(filepaths)
+        cmds = []
+        make_fixed_paths(filepaths).map {|file|
+          cmds << "mv #{file[0]} #{file[1]}"
+        }
+
+        cmds
+      end
+
+      def make_fixed_paths(filepaths)
+        dest = []
+        filepaths.each {|filepath|
+          fixed_path = fix_path(filepath[1], dest)
+          filepath[1] = fixed_path
+          dest << fixed_path
+        }
+
+        filepaths
+      end
+
+      def fix_path(filepath, check_array, index=0)
+        newpath = filepath
+        newpath = "#{filepath} (#{index})" if index > 0
+        return fix_path(filepath, check_array, index + 1) if exist?(newpath, check_array)
+
+        newpath
+      end
+
+      private
+      def exist?(filepath, check_array)
+        return true if File.exist?(filepath)
+
+        check_array.include?(filepath)
+      end
+
+      def make_new_path_for_array(sources, destination)
+        result = []
+        sources.each {|path|
+          result << [path, new_path(path, destination)]
+        }
+
+        result
+      end
+
+      def make_new_path_for_collection(sources, destination)
+        result = []
+        sources.each {|dirname, paths|
+          new_dir = destination + '/' + dirname.to_s
+          paths.each {|path|
+            result << [path, new_path(path, new_dir)]
+          }
+        }
+
+        result
+      end
+
+      def new_path(source, destination)
+        destination + '/' + File.basename(source)
+      end
+
+    end
+
   end
+
 end

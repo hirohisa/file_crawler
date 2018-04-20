@@ -1,41 +1,33 @@
-module FileCrawler
-  class Finder
-    module Command
-      module Search
+module FileCrawler::Finder::Command
 
-        def search(path, conditions = {})
-          tap {
-            @rows = search_directories(path)
-          }
-        end
+  module Search
+    include Base
 
-        def search_directories(path)
-          directories = search_directories_in_path(path)
-          return [path] if directories.empty?
-
-          result = []
-          directories.each {|item|
-            result += search_directories(item)
-          }
-
-          result
-        end
-
-        def search_directories_in_path(path)
-          find_files_in_path(path).select {|item|
-            File.directory?(item)
-          }
-        end
-
-        def find_files_in_path(path)
-          Dir.entries(path).select {|item|
-            !item.start_with?('.')
-          }.map {|item|
-            path + '/' + item
-          }
-        end
-      end
+    def search(path, options={})
+      tap {
+        @files = search_directories(path, options)
+      }
     end
+
+    def search_directories(path, options={})
+      result = []
+      cmd = "find #{path} -type d"
+      if options[:maxdepth] && options[:maxdepth] > 0
+        cmd = "find #{path} -maxdepth #{options[:maxdepth]} -type d"
+      end
+
+      exec(cmd).each_line(chomp: true) {|item|
+        valid = true
+        if options[:exclude_invisible_file]
+          filename = File.basename(item)
+          valid = !filename.start_with?('.')
+        end
+        result << item if valid
+      }
+
+      result
+    end
+
   end
 
 end

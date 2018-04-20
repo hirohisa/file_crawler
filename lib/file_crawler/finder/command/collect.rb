@@ -1,4 +1,5 @@
 module FileCrawler
+
   class Regex
     attr_accessor :regexp_start, :regexp_end
 
@@ -16,50 +17,62 @@ module FileCrawler
     end
   end
 
-  class Finder
-    module Command
-      module Collect
 
-        attr_accessor :regexs
+end
 
-        def regexs
-          @regexs ||= []
-        end
+module FileCrawler::Finder::Command
 
-        def collect(conditions = {})
-          tap {
-            @rows = collect_into_filename(@rows)
+  module Collect
+    include Base
+
+    attr_accessor :regexs
+
+    def regexs
+      @regexs ||= []
+    end
+
+    def collect(options={})
+      tap {
+        if options[:regexs].is_a?(Array)
+          options[:regexs].each {|o|
+            regexs << FileCrawler::Regex.new(o[0], o[1]) if o.size == 2
           }
         end
 
-        def collect_into_filename(file_paths)
-          hash = {}
+        @collections = Organizer.new.run(@files, regexs)
+      }
+    end
 
-          file_paths.each {|file_path|
-            filename = File.basename(file_path)
-            term = decide_index_for_collect(filename)
-            hash[term] ||= []
-            hash[term] << file_path
+    class Organizer
+
+      def run(filepaths, regexs)
+        hash = {}
+
+        filepaths.each {|filepath|
+          filename = File.basename(filepath)
+          term = decide_index(filename, regexs)
+          hash[term] ||= []
+          hash[term] << filepath
+        }
+
+        hash
+      end
+
+      def decide_index(string, regexs=[])
+        if !regexs.empty?
+          regexs.each {|regex|
+            return $1.strip unless regex.pattern.match(string).nil?
           }
-
-          hash
         end
 
-        def decide_index_for_collect(string)
-          if !regexs.empty?
-            regexs.each {|regex|
-              return $1.strip unless regex.pattern.match(string).nil?
-            }
-          end
+        pattern = /[\p{Hiragana}|\p{Katakana}|\p{Han}|[a-zA-Z0-9]ー 　]+/
+        result = string.strip.scan(pattern).first
+        return result.strip unless result.nil?
 
-          pattern = /[\p{Hiragana}|\p{Katakana}|\p{Han}|[a-zA-Z0-9]ー 　]+/
-          result = string.strip.scan(pattern).first
-          return result.strip unless result.nil?
-
-          string.strip
-        end
-
+        string.strip
       end
     end
+
   end
+
 end
