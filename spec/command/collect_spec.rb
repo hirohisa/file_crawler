@@ -3,73 +3,67 @@ require 'spec_helper'
 describe FileCrawler::Finder::Command::Collect do
 
   it 'collects in file paths' do
-    allow(Dir).to receive(:entries).and_return([])
-
-    path = '/path'
-    files = [
-      'path1', 'path2'
+    finder = FileCrawler::Finder.new
+    finder.files = [
+      '/path/path1/[abcd] defg',
+      '/path/path1/[あい] うえお',
+      '/path/path1/test 123',
+      '/path/path1/[123] 456',
+      '/path/path2/(abcd) defg',
+      '/path/path2/(あ) いうえお',
     ]
-    allow(Dir).to receive(:entries).with(path).and_return(files)
 
-    path1 = '/path/path1'
-    files1 = [
-      '[abcd] defg', '[あい] うえお', 'test 123', '[123] 456',
-    ]
-    allow(Dir).to receive(:entries).with(path1).and_return(files1)
-
-    path2 = '/path/path2'
-    files2 = [
-      '[abcd] defg', '[あ] いうえお'
-    ]
-    allow(Dir).to receive(:entries).with(path2).and_return(files2)
-    allow(File).to receive(:directory?).and_return(true)
-
-    actual = FileCrawler.collect(path)
+    finder.collect(regexs: ['[]', '()'])
+    result = finder.collections
 
     expected = {
-      'abcd': ['/path/path1/[abcd] defg', '/path/path2/[abcd] defg'],
+      'abcd': ['/path/path1/[abcd] defg', '/path/path2/(abcd) defg'],
       'test 123': ['/path/path1/test 123'],
       '123': ['/path/path1/[123] 456'],
-      'あ': ['/path/path2/[あ] いうえお'],
+      'あ': ['/path/path2/(あ) いうえお'],
       'あい': ['/path/path1/[あい] うえお'],
     }.map {|k,v|
       [k.to_s, v]
     }.to_h
 
-    expect(actual.keys.size).to eq expected.keys.size
-    actual.each {|actual_key, actual_value|
+    expect(result.keys.size).to eq expected.keys.size
+    result.each {|actual_key, actual_value|
       expect(actual_value.sort).to eq expected[actual_key].sort
     }
   end
 
-  it 'splits with symbols' do
-    finder = FileCrawler::Finder.new
+  describe FileCrawler::Finder::Command::Collect::Organizer do
 
-    result = finder.decide_index_for_collect('[TEST] test')
-    expect(result).to eq 'TEST'
+    it 'splits with symbols' do
+      organizer = FileCrawler::Finder::Command::Collect::Organizer.new
 
-    result = finder.decide_index_for_collect('【あいー】 うえお')
-    expect(result).to eq 'あいー'
+      result = organizer.decide_index('[TEST] test')
+      expect(result).to eq 'TEST'
 
-    result = finder.decide_index_for_collect('test2test')
-    expect(result).to eq 'test2test'
+      result = organizer.decide_index('【あいー】 うえお')
+      expect(result).to eq 'あいー'
 
-    result = finder.decide_index_for_collect('t；e,s*t')
-    expect(result).to eq 't'
+      result = organizer.decide_index('test2test')
+      expect(result).to eq 'test2test'
 
-    result = finder.decide_index_for_collect('   [test1] test2')
-    expect(result).to eq 'test1'
+      result = organizer.decide_index('t；e,s*t')
+      expect(result).to eq 't'
 
-    result = finder.decide_index_for_collect('---')
-    expect(result).to eq '---'
+      result = organizer.decide_index('   [test1] test2')
+      expect(result).to eq 'test1'
 
-    finder.regexs = [ FileCrawler::Regex.new('(', ')') ]
-    result = finder.decide_index_for_collect('t(e_s)t')
-    expect(result).to eq 'e_s'
+      result = organizer.decide_index('---')
+      expect(result).to eq '---'
 
-    finder.regexs = [ FileCrawler::Regex.new('[', ']') ]
-    result = finder.decide_index_for_collect('(abc) [def] ghij [klmn]')
-    expect(result).to eq 'def'
+      regexs = [ FileCrawler::Regex.new('(', ')') ]
+      result = organizer.decide_index('t(e_s)t', regexs)
+      expect(result).to eq 'e_s'
+
+      regexs = [ FileCrawler::Regex.new('[', ']') ]
+      result = organizer.decide_index('(abc) [def] ghij [klmn]', regexs)
+      expect(result).to eq 'def'
+    end
+
   end
 
 end

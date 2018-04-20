@@ -2,19 +2,24 @@ require 'spec_helper'
 
 describe FileCrawler::Finder::Command::Search do
 
-  it 'searches directories in current directory' do
-    path = '/tmp'
-    files = [
-      '.', '..', '.git', 'file', 'directory', 'extension.jpg',
-    ]
-    allow(Dir).to receive(:entries).and_return([])
-    allow(Dir).to receive(:entries).with(path).and_return(files)
-    allow(File).to receive(:directory?).and_return(false)
-    allow(File).to receive(:directory?).with('/tmp/directory').and_return(true)
+  it 'searches directories in this repository' do
+    path = '.'
+    finder = FileCrawler::Finder.new
+    finder.search(path, maxdepth: 1, exclude_invisible_file: true)
+    result = finder.files
 
-    result = FileCrawler.search(path)
+    expected = ["./bin", "./example", "./lib", "./spec"]
+    expect(result).to eq expected
+  end
 
-    expect(result[0]).to eq path + '/' + files[4] # /tmp/directory
+  it 'searches directories in this repository' do
+    path = '.'
+    finder = FileCrawler::Finder.new
+    finder.search(path, maxdepth: 1)
+    result = finder.files
+
+    expected = [".", "./.git", "./bin", "./example", "./lib", "./spec"]
+    expect(result).to eq expected
   end
 
 end

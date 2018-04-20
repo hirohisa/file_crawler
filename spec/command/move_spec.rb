@@ -2,46 +2,113 @@ require 'spec_helper'
 
 describe FileCrawler::Finder::Command::Move do
 
-  it 'moves a directory to destination' do
-    path = '/tmp'
-    destination = '/var'
-    files = [
-      '.', '..', '.git', 'file', 'directory', 'extension.jpg',
-    ]
+  describe FileCrawler::Finder::Command::Move::Fixer do
 
-    allow(Dir).to receive(:entries).and_return([])
-    allow(Dir).to receive(:entries).with(path).and_return(files)
-    allow(File).to receive(:directory?).and_return(false)
-    allow(File).to receive(:directory?).with('/tmp/directory').and_return(true)
-    allow(File).to receive(:directory?).with('/var').and_return(true)
+    it 'fixes new paths' do
+      destination = '/var'
+      sources = {
+        'abcd': ['/path/path1/[abcd ] defg', '/path/path2/(abcd) defg'],
+        'test 123': ['/path/path1/test 123'],
+        '123': ['/path/path1/[123] 456'],
+        'あ': ['/path/path2/(あ) いうえお'],
+        'あい': ['/path/path1/[あい] うえお'],
+      }
 
-    allow(FileUtils).to receive(:mv).and_return(nil)
+      fixer = FileCrawler::Finder::Command::Move::Fixer.new
+      result = fixer.make_new_path(sources, destination)
 
-    result = FileCrawler.move(path, destination)
+      expected = [
+        ['/path/path1/[abcd ] defg', '/var/abcd/[abcd ] defg'],
+        ['/path/path2/(abcd) defg', '/var/abcd/(abcd) defg'],
+        ['/path/path1/test 123', '/var/test 123/test 123'],
+        ['/path/path1/[123] 456', '/var/123/[123] 456'],
+        ['/path/path2/(あ) いうえお', '/var/あ/(あ) いうえお'],
+        ['/path/path1/[あい] うえお', '/var/あい/[あい] うえお'],
+      ]
 
-    expect(result[0]).to eq destination + '/' + files[4] # /var/directory
+      expect(result.sort).to eq expected.sort
+    end
+
+    it 'fixes new paths' do
+      destination = '/var'
+      sources = [
+        '/path/path1/[abcd ] defg',
+        '/path/path2/(abcd) defg',
+      ]
+
+      fixer = FileCrawler::Finder::Command::Move::Fixer.new
+      result = fixer.make_new_path(sources, destination)
+
+      expected = [
+        ['/path/path1/[abcd ] defg', '/var/[abcd ] defg'],
+        ['/path/path2/(abcd) defg', '/var/(abcd) defg'],
+      ]
+
+      expect(result.sort).to eq expected.sort
+    end
+
+    it 'fixes path' do
+      array = [
+        '/var/b',
+        '/var/c (1)',
+        '/var/c (2)',
+      ]
+
+      fixer = FileCrawler::Finder::Command::Move::Fixer.new
+
+      result = fixer.fix_path('/var/a', array)
+      expected = '/var/a'
+      expect(result).to eq expected
+      result = fixer.fix_path('/var/b', array)
+      expected = '/var/b (1)'
+      expect(result).to eq expected
+
+      result = fixer.fix_path('/var/c', array)
+      expected = '/var/c'
+      expect(result).to eq expected
+
+      result = fixer.fix_path('/var/c', array + ['/var/c'])
+      expected = '/var/c (3)'
+      expect(result).to eq expected
+    end
+
+    it 'makes fixed paths' do
+      array = [
+        ['/temp/b', '/var/b'],
+        ['/temp/a/b', '/var/b'],
+        ['/temp/c/b', '/var/b'],
+        ['/temp/d/b', '/var/b'],
+      ]
+
+      fixer = FileCrawler::Finder::Command::Move::Fixer.new
+
+      result = fixer.make_fixed_paths(array)
+      expected = [
+        ["/temp/b", "/var/b"],
+        ["/temp/a/b", "/var/b (1)"],
+        ["/temp/c/b", "/var/b (2)"],
+        ["/temp/d/b", "/var/b (3)"]
+      ]
+
+      expect(result).to eq expected
+    end
+
+    it 'makes mv commands' do
+      array = [
+        ['/temp/b', '/var/b'],
+        ['/temp/a/b', '/var/b'],
+      ]
+
+      fixer = FileCrawler::Finder::Command::Move::Fixer.new
+
+      result = fixer.make_mv(array)
+      expected = [
+        "mv /temp/b /var/b",
+        "mv /temp/a/b /var/b (1)",
+      ]
+      expect(result).to eq expected
+    end
+
   end
-
-  it 'moves directories with numbering when same name directory already exist in destination' do
-    path = '/tmp'
-    destination = '/var'
-    files = [
-      'directory', 'directory1'
-    ]
-    allow(Dir).to receive(:entries).and_return([])
-    allow(Dir).to receive(:entries).with(path).and_return(files)
-    allow(File).to receive(:directory?).and_return(true)
-    allow(File).to receive(:exist?).and_return(false)
-    allow(File).to receive(:exist?).with('/var').and_return(true)
-    allow(File).to receive(:exist?).with('/var/directory').and_return(true)
-    allow(File).to receive(:exist?).with('/var/directory (1)').and_return(true)
-
-    allow(FileUtils).to receive(:mv).and_return(nil)
-
-    result = FileCrawler.move(path, destination, numbering: true)
-
-    expect(result[0]).to eq destination + '/' + files[1] # /var/directory1
-    expect(result[1]).to eq destination + '/' + "#{files[0]} (2)"  # /var/directory (2)
-  end
-
+  
 end
