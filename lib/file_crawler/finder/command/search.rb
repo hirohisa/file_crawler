@@ -16,7 +16,8 @@ module FileCrawler::Finder::Command
         cmd = "find #{path} -maxdepth #{options[:maxdepth]} -type d"
       end
 
-      exec(cmd).each_line(chomp: true) {|item|
+      exec(cmd).each_line {|item|
+        item.chomp!
         valid = true
         if options[:exclude_invisible_file]
           filename = File.basename(item)
