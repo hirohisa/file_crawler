@@ -103,6 +103,7 @@ describe FileCrawler::Finder::Command::Move do
 
       result = fixer.make_mv(array)
       expected = [
+        "mkdir -p /var",
         "mv /temp/b /var/b",
         "mv /temp/a/b /var/b (1)",
       ]
@@ -110,5 +111,5 @@ describe FileCrawler::Finder::Command::Move do
     end
 
   end
-  
+
 end

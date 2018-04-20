@@ -42,11 +42,13 @@ module FileCrawler::Finder::Command
 
       def make_mv(filepaths)
         cmds = []
+        mkdirs = []
         make_fixed_paths(filepaths).map {|file|
+          mkdirs << "mkdir -p #{File.dirname(file[1])}"
           cmds << "mv #{file[0]} #{file[1]}"
         }
 
-        cmds
+        mkdirs.uniq + cmds
       end
 
       def make_fixed_paths(filepaths)
