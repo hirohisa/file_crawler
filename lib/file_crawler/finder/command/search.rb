@@ -15,6 +15,9 @@ module FileCrawler::Finder::Command
       if options[:maxdepth] && options[:maxdepth] > 0
         cmd = "find #{path} -maxdepth #{options[:maxdepth]} -type d"
       end
+      if options[:grep]
+        cmd += "| grep #{options[:grep]}"
+      end
 
       exec(cmd).each_line {|item|
         item.chomp!
