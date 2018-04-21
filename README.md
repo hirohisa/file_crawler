@@ -1,5 +1,7 @@
 # FileCrawler
 
+[![Gem-version](https://img.shields.io/gem/v/file_crawler.svg)](https://rubygems.org/gems/file_crawler) [![Build Status](https://travis-ci.org/hirohisa/file_crawler.svg?branch=master)](https://travis-ci.org/hirohisa/file_crawler)
+
 ## Installation
 
 Add this line to your application's Gemfile:
