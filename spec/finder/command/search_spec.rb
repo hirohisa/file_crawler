@@ -15,10 +15,10 @@ describe FileCrawler::Finder::Command::Search do
   it 'searches directories in this repository' do
     path = '.'
     finder = FileCrawler::Finder.new
-    finder.search(path, maxdepth: 1)
+    finder.search(path, maxdepth: 1, grep: 'git')
     result = finder.files
 
-    expected = [".", "./.git", "./bin", "./lib", "./spec"]
+    expected = ["./.git"]
     expect(result).to eq expected
   end
 
