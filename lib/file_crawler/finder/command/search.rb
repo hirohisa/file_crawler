@@ -16,7 +16,7 @@ module FileCrawler::Finder::Command
         cmd = "find #{path} -maxdepth #{options[:maxdepth]} -type d"
       end
       if options[:grep]
-        cmd += "| grep '#{options[:grep]}.inspect'"
+        cmd += "| grep #{options[:grep].inspect}"
       end
 
       exec(cmd).each_line {|item|
