@@ -72,7 +72,10 @@ p finder.output_mv #=> [ "mv ./bin /var/bin", "mv ./lib /var/lib", ...]
 finder.move(destination, dry_run: false)
 ```
 
-# finder.search(source, grep: 'sample').collect(regexs: ['[]']).move(destination)
+- Chain
+```ruby
+finder.search(source, grep: 'sample').collect(regexs: ['[]']).move(destination)
+```
 
 
 ## Contributing
