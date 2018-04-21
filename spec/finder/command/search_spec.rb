@@ -8,7 +8,7 @@ describe FileCrawler::Finder::Command::Search do
     finder.search(path, maxdepth: 1, exclude_invisible_file: true)
     result = finder.files
 
-    expected = ["./bin", "./example", "./lib", "./spec"]
+    expected = ["./bin", "./lib", "./spec"]
     expect(result).to eq expected
   end
 
@@ -18,7 +18,7 @@ describe FileCrawler::Finder::Command::Search do
     finder.search(path, maxdepth: 1)
     result = finder.files
 
-    expected = [".", "./.git", "./bin", "./example", "./lib", "./spec"]
+    expected = [".", "./.git", "./bin", "./lib", "./spec"]
     expect(result).to eq expected
   end
 

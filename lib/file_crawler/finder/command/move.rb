@@ -18,8 +18,8 @@ module FileCrawler::Finder::Command
       }
     end
 
-    def cmds
-      return nil if @targets.nil?
+    def output_mv
+      return [] if @targets.nil?
 
       fixer = Fixer.new
       fixer.make_mv(@targets)
