@@ -31,23 +31,23 @@ finder = FileCrawler::Finder.new
 ```ruby
 path = '.'
 
-# stored `files`
 finder.search(path)
 p finder.directories #=> ["./bin", "./lib", "./spec", ...]
+p finder.dirs #=> ["./bin", "./lib", "./spec", ...] # directories's shortname
 
 finder.search(path, maxdepth: 1)
-p finder.directories #=> ["./bin", "./lib", "./spec"]
+p finder.dirs #=> ["./bin", "./lib", "./spec"]
 
 finder.search(path, maxdepth: 1, grep: 'sample')
-p finder.directories #=> []
+p finder.dirs #=> []
 
 ```
 
-- Create groups per label decided by file name
+- Create groups per label decided by directory name
 
 ```ruby
-# collect use `files`
-# files = ['/path/path1/[abcd] defg', '/path/path2/(abcd) defg', '/path/path1/test 123', ...
+# collect use `directories`
+# directories = ['/path/path1/[abcd] defg', '/path/path2/(abcd) defg', '/path/path1/test 123', ...
 finder.collect(regexs: ['[]', '()'])
 p finder.collections
 #=> { 'abcd': ['/path/path1/[abcd] defg', '/path/path2/(abcd) defg'], 'test 123': ['/path/path1/test 123'], ... }
@@ -56,7 +56,7 @@ p finder.collections
 - Move directory to destination
 
 ```ruby
-# move use `files` or `collections`
+# move use `directories` or `collections`
 # files = #=> ["./bin", "./lib", ...]
 destination = '/var'
 finder.move(destination)

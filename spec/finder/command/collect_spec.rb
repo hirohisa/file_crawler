@@ -2,6 +2,12 @@ require 'spec_helper'
 
 describe FileCrawler::Finder::Command::Collect do
 
+  class FileCrawler::Finder
+    def directories=(val)
+      @directories = val
+    end
+  end
+
   it 'collects in file paths' do
     finder = FileCrawler::Finder.new
     finder.directories = [

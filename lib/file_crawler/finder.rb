@@ -3,7 +3,7 @@ require_relative 'finder/command'
 module FileCrawler
 
   class Finder
-    attr_accessor :directories, :collections
+    attr_reader :directories, :dirs, :collections
 
     include Command::Collect
     include Command::Move
@@ -11,6 +11,10 @@ module FileCrawler
 
     def initialize
       @rows = []
+    end
+
+    def dirs
+      @directories
     end
   end
 
