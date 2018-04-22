@@ -39,7 +39,7 @@ module FileCrawler::Finder::Command
           }
         end
 
-        @collections = Organizer.new.run(@files, regexs)
+        @collections = Organizer.new.run(@directories, regexs)
       }
     end
 

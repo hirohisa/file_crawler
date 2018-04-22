@@ -6,7 +6,7 @@ module FileCrawler::Finder::Command
 
     def move(destination, options={dry_run: true})
       tap {
-        target = @collections.empty? ? @files : @collections
+        target = @collections.empty? ? @directories : @collections
         fixer = Fixer.new
         @targets = fixer.make_new_path(target, destination)
 

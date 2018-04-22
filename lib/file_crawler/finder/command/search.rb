@@ -5,7 +5,7 @@ module FileCrawler::Finder::Command
 
     def search(path, options={})
       tap {
-        @files = search_directories(path, options)
+        @directories = search_directories(path, options)
       }
     end
 
