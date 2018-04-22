@@ -33,13 +33,13 @@ path = '.'
 
 # stored `files`
 finder.search(path)
-p finder.files #=> ["./bin", "./lib", "./spec", ...]
+p finder.directories #=> ["./bin", "./lib", "./spec", ...]
 
 finder.search(path, maxdepth: 1)
-p finder.files #=> ["./bin", "./lib", "./spec"]
+p finder.directories #=> ["./bin", "./lib", "./spec"]
 
 finder.search(path, maxdepth: 1, grep: 'sample')
-p finder.files #=> []
+p finder.directories #=> []
 
 ```
 

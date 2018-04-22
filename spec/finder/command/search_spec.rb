@@ -6,7 +6,7 @@ describe FileCrawler::Finder::Command::Search do
     path = '.'
     finder = FileCrawler::Finder.new
     finder.search(path, maxdepth: 1, exclude_invisible_file: true)
-    result = finder.files
+    result = finder.directories
 
     expected = ["./bin", "./lib", "./spec"]
     expect(result).to eq expected
@@ -16,7 +16,7 @@ describe FileCrawler::Finder::Command::Search do
     path = '.'
     finder = FileCrawler::Finder.new
     finder.search(path, maxdepth: 1, grep: 'git')
-    result = finder.files
+    result = finder.directories
 
     expected = ["./.git"]
     expect(result).to eq expected
