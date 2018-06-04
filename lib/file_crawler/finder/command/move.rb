@@ -44,7 +44,7 @@ module FileCrawler::Finder::Command
         cmds = []
         mkdirs = []
         make_fixed_paths(filepaths).map {|file|
-          mkdirs << "mkdir -p #{File.dirname(file[1])}"
+          mkdirs << "mkdir -p #{File.dirname(file[1]).inspect}"
           cmds << "mv #{file[0].inspect} #{file[1].inspect}"
         }
 
